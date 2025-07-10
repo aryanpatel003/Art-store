@@ -1,0 +1,219 @@
+
+"use client";
+
+import { useState, useEffect, useRef } from 'react';
+import { notFound, useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import { products } from '@/lib/data';
+import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Heart, ShoppingBag, CheckCircle, ChevronLeft, Star } from 'lucide-react';
+import { useWishlist } from '@/hooks/use-wishlist';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+
+const StarRating = ({ rating, className }: { rating: number, className?: string }) => {
+  return (
+    <div className={cn("flex items-center gap-0.5", className)}>
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={cn(
+            "h-4 w-4",
+            rating > i ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20"
+          )}
+        />
+      ))}
+    </div>
+  )
+}
+
+export default function ProductPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const { addToCart, cartCount } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const product = products.find(p => p.id === params.id);
+  
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(product?.sizes.length === 1 ? product.sizes[0] : undefined);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(product?.colors.length === 1 ? product.colors[0] : undefined);
+  const [isFooterVisible, setIsFooterVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Hide if scrolling down and past a certain point, show if scrolling up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 200) {
+        setIsFooterVisible(false);
+      } else {
+        setIsFooterVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  if (!product) {
+    notFound();
+  }
+  
+  const isLiked = isInWishlist(product.id);
+
+  const reviews = product?.reviews || [];
+  const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
+  
+  const handleAddToCart = () => {
+    if (product.sizes.length > 1 && !selectedSize) {
+        toast({ title: "Please select a size.", variant: "destructive" });
+        return;
+    }
+    if (product.colors.length > 1 && !selectedColor) {
+        toast({ title: "Please select a color.", variant: "destructive" });
+        return;
+    }
+    addToCart(product, selectedSize || product.sizes[0], selectedColor || product.colors[0]);
+    toast({
+      title: "Added to Cart!",
+      action: <CheckCircle className="text-green-500" />,
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  return (
+    <div className="bg-secondary text-foreground">
+      <div className="container mx-auto max-w-md p-0">
+        <div className="relative min-h-screen">
+
+          {/* Top section with image */}
+          <div className="h-[55vh] w-full bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 relative">
+            <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 text-foreground">
+                <Button variant="secondary" size="icon" className="rounded-full shadow-md" onClick={() => router.back()}>
+                    <ChevronLeft className="h-6 w-6" />
+                </Button>
+                <Link href="/cart" aria-label={`Shopping cart with ${cartCount} items`}>
+                    <Button variant="secondary" size="icon" className="rounded-full shadow-md">
+                        <div className="relative">
+                            <ShoppingBag className="h-5 w-5" />
+                            {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                                {cartCount}
+                            </span>
+                            )}
+                        </div>
+                    </Button>
+                </Link>
+            </header>
+            
+            <div className="absolute top-16 right-4 z-10">
+                <Button variant="secondary" size="icon" className="rounded-full shadow-md" onClick={() => toggleWishlist(product.id)}>
+                    <Heart className={cn("h-5 w-5 transition-colors", isLiked && "fill-red-500 text-red-500")} />
+                </Button>
+            </div>
+
+            <div className="w-full h-full pt-16">
+                 <Image 
+                    src={product.images[0]} 
+                    alt={product.name}
+                    width={500}
+                    height={500}
+                    className="object-contain w-full h-full drop-shadow-2xl"
+                    priority
+                />
+            </div>
+          </div>
+
+          {/* Details Panel */}
+          <div className="absolute bottom-0 left-0 right-0 bg-background rounded-t-[32px] shadow-2xl p-6 pt-4 pb-28">
+            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-border mb-4" />
+            
+            <div className="flex justify-between items-start">
+              <h1 className="text-2xl font-bold">{product.name}</h1>
+              <div className="flex-shrink-0 pt-1">
+                <StarRating rating={averageRating} />
+              </div>
+            </div>
+            
+            <p className="mt-2 text-muted-foreground text-sm leading-relaxed">{product.description}</p>
+            
+            {product.sizes.length > 1 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">Size</h3>
+                <RadioGroup value={selectedSize} onValueChange={setSelectedSize} className="flex flex-wrap gap-3">
+                  {product.sizes.map(size => (
+                    <div key={size}>
+                      <RadioGroupItem value={size} id={`size-${size}`} className="sr-only" />
+                      <Label 
+                        htmlFor={`size-${size}`}
+                        className={cn(
+                          "border rounded-lg px-5 h-12 flex items-center justify-center cursor-pointer transition-colors text-base font-medium",
+                          "hover:border-primary",
+                          selectedSize === size ? "bg-primary text-primary-foreground border-primary" : "bg-secondary"
+                        )}
+                      >
+                        {size}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+            
+            <Separator className="my-6"/>
+
+            {reviews.length > 0 && (
+                <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Reviews ({reviews.length})</h3>
+                    <div className="flex -space-x-2">
+                        {reviews.slice(0, 4).map((review, index) => (
+                           <Avatar key={index} className="h-10 w-10 border-2 border-background">
+                             <AvatarImage src={`https://placehold.co/40x40.png`} alt={review.author} data-ai-hint="person face" />
+                             <AvatarFallback>{review.author.charAt(0)}</AvatarFallback>
+                           </Avatar>
+                        ))}
+                    </div>
+                </div>
+            )}
+          </div>
+
+          {/* Sticky Footer CTA */}
+          <div className={cn(
+            "fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out",
+            isFooterVisible ? "translate-y-0" : "translate-y-full"
+          )}>
+            <div className="container mx-auto max-w-md bg-background/80 backdrop-blur-sm border-t p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Price</p>
+                  <p className="text-2xl font-bold">{formatPrice(product.price)}</p>
+                </div>
+                <Button size="lg" className="w-auto flex-1 ml-4 rounded-xl" onClick={handleAddToCart}>
+                  <ShoppingBag className="mr-2 h-5 w-5" />
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
