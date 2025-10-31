@@ -3,8 +3,8 @@
 
 import { useState, useEffect, ReactNode } from 'react';
 import type { CartItem, Product } from '@/types';
-import { CartContext } from './use-cart';
-import { useToast } from './use-toast';
+import { CartContext } from '@/lib/use-cart';
+import { useToast } from '@/lib/use-toast';
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -41,35 +41,49 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if(promoCode) applyPromoCode(promoCode, true);
 
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartItems, promoCode, isInitial]);
 
-  const addToCart = (product: Product, selectedSize: string, selectedColor: string) => {
+  const addItem = ({ product, quantity, selectedSize, selectedColor }: { product: Product; quantity: number; selectedSize?: string; selectedColor?: string }) => {
+    const size = selectedSize || product.sizes[0];
+    const color = selectedColor || product.colors[0];
     setCartItems(prevItems => {
-      const cartItemId = `${product.id}-${selectedSize}-${selectedColor}`;
-      const existingItem = prevItems.find(item => `${item.id}-${item.selectedSize}-${item.selectedColor}` === cartItemId);
+      const existingItem = prevItems.find(
+        item => item.product.id === product.id && 
+                item.selectedSize === size && 
+                item.selectedColor === color
+      );
       if (existingItem) {
         return prevItems.map(item =>
-          `${item.id}-${item.selectedSize}-${item.selectedColor}` === cartItemId
-            ? { ...item, quantity: item.quantity + 1 }
+          item.product.id === product.id && 
+          item.selectedSize === size && 
+          item.selectedColor === color
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
-        return [...prevItems, { ...product, quantity: 1, selectedSize, selectedColor }];
+        return [...prevItems, { product, quantity, selectedSize: size, selectedColor: color }];
       }
     });
   };
 
-  const removeFromCart = (cartItemId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => `${item.id}-${item.selectedSize}-${item.selectedColor}` !== cartItemId));
+  const removeItem = (productId: string, selectedSize?: string, selectedColor?: string) => {
+    setCartItems(prevItems => prevItems.filter(
+      item => !(item.product.id === productId && 
+                item.selectedSize === selectedSize && 
+                item.selectedColor === selectedColor)
+    ));
   };
   
-  const updateQuantity = (cartItemId: string, quantity: number) => {
+  const updateQuantity = (productId: string, selectedSize: string | undefined, selectedColor: string | undefined, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(cartItemId);
+      removeItem(productId, selectedSize, selectedColor);
     } else {
       setCartItems(prevItems =>
         prevItems.map(item =>
-            `${item.id}-${item.selectedSize}-${item.selectedColor}` === cartItemId
+          item.product.id === productId && 
+          item.selectedSize === selectedSize && 
+          item.selectedColor === selectedColor
             ? { ...item, quantity }
             : item
         )
@@ -84,7 +98,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const applyPromoCode = (code: string, silent = false) => {
-    const currentSubtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const currentSubtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     if (code.toUpperCase() === 'SAVE10') {
       setDiscount(currentSubtotal * 0.10);
       setPromoCode(code);
@@ -97,14 +111,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
 
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const gst = subtotal * 0.18;
-  const deliveryFee = subtotal > 4000 || subtotal === 0 ? 0 : 40;
-  const cartTotal = (subtotal + gst + deliveryFee) - discount;
+  const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const total = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, applyPromoCode, cartCount, subtotal, gst, deliveryFee, discount, cartTotal }}>
+    <CartContext.Provider value={{ 
+      cartItems, 
+      items: cartItems,
+      addItem, 
+      removeItem, 
+      updateQuantity, 
+      clearCart, 
+      applyPromoCode, 
+      count,
+      total
+    }}>
       {children}
     </CartContext.Provider>
   );

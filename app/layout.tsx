@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ConditionalHeader } from "@/components/conditional-header";
 import { ConditionalFooter } from "@/components/conditional-footer";
@@ -9,12 +8,6 @@ import { CartProvider } from "@/components/cart-provider";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { NavigationEvents } from "@/components/navigation-events";
-
-const inter = Inter({ subsets: ["latin"] });
-const playfair = Playfair_Display({ 
-  subsets: ["latin"],
-  variable: '--font-headline',
-});
 
 export const metadata: Metadata = {
   title: "Canvas & Palette - Premium Art Supplies",
@@ -28,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${playfair.variable}`}>
+      <body className="font-sans">
         <CartProvider>
           <WishlistProvider>
             <div className="flex flex-col min-h-screen">

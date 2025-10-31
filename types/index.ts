@@ -42,6 +42,8 @@ export interface OrderItem {
 }
 
 export interface Address {
+  id?: string;
+  isDefault?: boolean;
   name: string;
   addressLine1: string;
   addressLine2?: string;
@@ -60,18 +62,6 @@ export interface Order {
   total: number;
   shippingAddress: Address;
   items: OrderItem[];
-}
-
-export interface Address {
-  id: string;
-  isDefault: boolean;
-  name: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
 }
 
 export interface PaymentMethod {
@@ -100,4 +90,26 @@ export interface CartItem {
   quantity: number;
   selectedSize?: string;
   selectedColor?: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  totalOrders: number;
+  totalSpent: number;
+  joinedDate: Date;
+}
+
+export interface Promocode {
+  id: string;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  expiryDate?: Date;
+  usageLimit?: number;
+  usageCount?: number;
+  status: 'active' | 'inactive' | 'expired';
 }

@@ -63,7 +63,15 @@ function CollectionsContent() {
         </p>
       </div>
 
-      <CollectionControls />
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-muted-foreground">
+          {isLoading ? (
+            <span className="inline-block h-5 w-24 bg-muted animate-pulse rounded-md" />
+          ) : (
+            `Showing ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`
+          )}
+        </p>
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 mt-8">

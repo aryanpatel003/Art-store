@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext, useContext } from 'react';
+import type { Product } from '@/types';
 
 interface WishlistContextType {
-  wishlistItems: string[]; // array of product ids
-  toggleWishlist: (productId: string) => void;
+  items: Product[];
+  addItem: (product: Product) => void;
+  removeItem: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
-  wishlistCount: number;
+  count: number;
 }
 
 export const WishlistContext = createContext<WishlistContextType | undefined>(undefined);

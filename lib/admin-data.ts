@@ -91,35 +91,45 @@ export const customers: Customer[] = [
         name: 'Olivia Martin',
         email: 'olivia.martin@email.com',
         avatar: 'https://placehold.co/40x40.png',
-        totalSpent: 2450.50
+        totalOrders: 5,
+        totalSpent: 2450.50,
+        joinedDate: new Date('2024-01-15')
     },
     {
         id: '2',
         name: 'Jackson Lee',
         email: 'jackson.lee@email.com',
         avatar: 'https://placehold.co/40x40.png',
-        totalSpent: 1890.00
+        totalOrders: 3,
+        totalSpent: 1890.00,
+        joinedDate: new Date('2024-02-20')
     },
     {
         id: '3',
         name: 'Ava Garcia',
         email: 'ava.garcia@email.com',
         avatar: 'https://placehold.co/40x40.png',
-        totalSpent: 1575.75
+        totalOrders: 4,
+        totalSpent: 1575.75,
+        joinedDate: new Date('2024-03-10')
     },
     {
         id: '4',
         name: 'Noah Rodriguez',
         email: 'noah.rodriguez@email.com',
         avatar: 'https://placehold.co/40x40.png',
-        totalSpent: 3210.20
+        totalOrders: 7,
+        totalSpent: 3210.20,
+        joinedDate: new Date('2024-01-05')
     },
     {
         id: '5',
         name: 'Liam Martinez',
         email: 'liam.martinez@email.com',
         avatar: 'https://placehold.co/40x40.png',
-        totalSpent: 980.00
+        totalOrders: 2,
+        totalSpent: 980.00,
+        joinedDate: new Date('2024-04-22')
     },
 ];
 

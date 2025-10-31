@@ -6,17 +6,14 @@ import type { CartItem, Product } from '@/types';
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: Product, selectedSize: string, selectedColor: string) => void;
-  removeFromCart: (cartItemId: string) => void;
-  updateQuantity: (cartItemId: string, quantity: number) => void;
+  addItem: (item: { product: Product; quantity: number; selectedSize?: string; selectedColor?: string }) => void;
+  removeItem: (productId: string, selectedSize?: string, selectedColor?: string) => void;
+  updateQuantity: (productId: string, selectedSize: string | undefined, selectedColor: string | undefined, quantity: number) => void;
   clearCart: () => void;
   applyPromoCode: (code: string) => void;
-  cartCount: number;
-  subtotal: number;
-  gst: number;
-  deliveryFee: number;
-  discount: number;
-  cartTotal: number;
+  total: number;
+  count: number;
+  items: CartItem[];
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);

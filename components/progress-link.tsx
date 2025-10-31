@@ -1,7 +1,6 @@
 
 'use client';
 
-import NProgress from 'nprogress';
 import Link, { type LinkProps } from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { AnchorHTMLAttributes } from 'react';
@@ -20,12 +19,6 @@ export function ProgressLink({ href, ...props }: ProgressLinkProps) {
         // Otherwise, prevent navigation.
         event.preventDefault();
         return;
-    }
-
-    // Only show progress bar for internal navigation.
-    // This avoids showing it for mailto: or external links.
-    if (String(href).startsWith('/')) {
-        NProgress.start();
     }
     
     // Propagate the original onClick event if it exists.

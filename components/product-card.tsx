@@ -6,7 +6,7 @@ import Image from 'next/image';
 import type { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
-import { useWishlist } from '@/hooks/use-wishlist';
+import { useWishlist } from '@/lib/use-wishlist';
 import { cn } from '@/lib/utils';
 
 
@@ -26,7 +26,7 @@ const imageHints: Record<string, string> = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInWishlist, addItem, removeItem } = useWishlist();
   const isLiked = isInWishlist(product.id);
 
   const formatPrice = (price: number) => {
@@ -39,7 +39,11 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWishlist(product.id);
+    if (isLiked) {
+      removeItem(product.id);
+    } else {
+      addItem(product);
+    }
   }
 
   return (

@@ -1,49 +1,52 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from 'react';
-import { WishlistContext } from './use-wishlist';
+import { WishlistContext } from '@/lib/use-wishlist';
+import { products } from '@/lib/data';
+import type { Product } from '@/types';
 
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
-  const [wishlistItems, setWishlistItems] = useState<string[]>([]);
+  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [isInitial, setIsInitial] = useState(true);
   
   useEffect(() => {
     try {
         const storedWishlist = localStorage.getItem('wishlist');
         if (storedWishlist) {
-          setWishlistItems(JSON.parse(storedWishlist));
+          setWishlistIds(JSON.parse(storedWishlist));
         }
     } catch (error) {
         console.error("Failed to parse wishlist from localStorage", error);
-        setWishlistItems([]);
+        setWishlistIds([]);
     }
     setIsInitial(false);
   }, []);
 
   useEffect(() => {
     if (!isInitial) {
-      localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+      localStorage.setItem('wishlist', JSON.stringify(wishlistIds));
     }
-  }, [wishlistItems, isInitial]);
+  }, [wishlistIds, isInitial]);
 
   const isInWishlist = (productId: string) => {
-      return wishlistItems.includes(productId);
+      return wishlistIds.includes(productId);
   }
 
-  const toggleWishlist = (productId: string) => {
-    setWishlistItems(prevItems => {
-        if (prevItems.includes(productId)) {
-            return prevItems.filter(id => id !== productId);
-        } else {
-            return [...prevItems, productId];
-        }
-    });
+  const addItem = (product: Product) => {
+    if (!wishlistIds.includes(product.id)) {
+      setWishlistIds(prev => [...prev, product.id]);
+    }
   };
 
-  const wishlistCount = wishlistItems.length;
+  const removeItem = (productId: string) => {
+    setWishlistIds(prev => prev.filter(id => id !== productId));
+  };
+
+  const items = products.filter(p => wishlistIds.includes(p.id));
+  const count = wishlistIds.length;
 
   return (
-    <WishlistContext.Provider value={{ wishlistItems, toggleWishlist, isInWishlist, wishlistCount }}>
+    <WishlistContext.Provider value={{ items, addItem, removeItem, isInWishlist, count }}>
       {children}
     </WishlistContext.Provider>
   );

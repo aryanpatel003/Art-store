@@ -1,164 +1,104 @@
+'use client';
 
-"use client";
-
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, User, Settings, LogOut, PanelLeft, Paintbrush, LayoutTemplate } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Search, ShoppingCart, Heart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Badge } from '@/components/ui/badge';
+import { SearchDialog } from '@/components/search-dialog';
+import { useCart } from '@/lib/use-cart';
+import { useWishlist } from '@/lib/use-wishlist';
 
+export function Header() {
+  const pathname = usePathname();
+  const { items: cartItems } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-export function AdminHeader() {
-    const pathname = usePathname();
-    const breadcrumbParts = pathname.split('/').filter(p => p && p !== 'admin');
-    const currentPage = breadcrumbParts[0] ? capitalize(breadcrumbParts[0]) : 'Dashboard';
-    const [isSheetOpen, setIsSheetOpen] = useState(false);
-    
-    return (
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button size="icon" variant="outline" className="sm:hidden">
-                        <PanelLeft className="h-5 w-5" />
-                        <span className="sr-only">Toggle Menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="sm:max-w-xs">
-                    <SheetHeader>
-                        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                    </SheetHeader>
-                    <nav className="grid gap-6 text-lg font-medium">
-                        <Link
-                            href="/"
-                            onClick={() => setIsSheetOpen(false)}
-                            className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                            >
-                            <Paintbrush className="h-5 w-5 transition-all group-hover:scale-110" />
-                            <span className="sr-only">Canvas & Palette</span>
-                        </Link>
-                         <Link
-                            href="/admin"
-                            onClick={() => setIsSheetOpen(false)}
-                            className={pathname === "/admin" ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Dashboard
-                        </Link>
-                         <Link
-                            href="/admin/orders"
-                            onClick={() => setIsSheetOpen(false)}
-                            className={pathname.startsWith("/admin/orders") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Orders
-                        </Link>
-                         <Link
-                            href="/admin/products"
-                            onClick={() => setIsSheetOpen(false)}
-                            className={pathname.startsWith("/admin/products") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Products
-                        </Link>
-                         <Link
-                             href="/admin/customers"
-                             onClick={() => setIsSheetOpen(false)}
-                             className={pathname.startsWith("/admin/customers") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Customers
-                        </Link>
-                         <Link
-                             href="/admin/promocodes"
-                             onClick={() => setIsSheetOpen(false)}
-                             className={pathname.startsWith("/admin/promocodes") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Promocodes
-                        </Link>
-                        <Link
-                            href="/admin/reviews"
-                            onClick={() => setIsSheetOpen(false)}
-                            className={pathname.startsWith("/admin/reviews") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Reviews & Q&A
-                        </Link>
-                        <Link
-                             href="/admin/hero"
-                             onClick={() => setIsSheetOpen(false)}
-                             className={pathname.startsWith("/admin/hero") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Hero Section
-                        </Link>
-                        <Link
-                             href="/admin/settings"
-                             onClick={() => setIsSheetOpen(false)}
-                             className={pathname.startsWith("/admin/settings") ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"}
-                        >
-                            Settings
-                        </Link>
-                    </nav>
-                </SheetContent>
-            </Sheet>
-            
-            <Breadcrumb className="hidden md:flex">
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>{currentPage}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                </BreadcrumbList>
-            </Breadcrumb>
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2">
+          <span className="text-2xl font-headline font-bold text-primary">Canvas & Palette</span>
+        </Link>
 
-            <div className="relative ml-auto flex-1 md:grow-0">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    type="search"
-                    placeholder="Search..."
-                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                />
-            </div>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="overflow-hidden rounded-full"
-                    >
-                        <Avatar className="h-9 w-9">
-                            <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="person face" />
-                            <AvatarFallback>AD</AvatarFallback>
-                        </Avatar>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                        <Link href="/admin/settings" className="flex items-center w-full">
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Logout</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </header>
-    );
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link
+            href="/collections"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.startsWith('/collections') ? 'text-primary' : 'text-foreground'
+            }`}
+          >
+            Shop
+          </Link>
+          <Link
+            href="/collections?category=Paints"
+            className="text-sm font-medium transition-colors hover:text-primary"
+          >
+            Paints
+          </Link>
+          <Link
+            href="/collections?category=Brushes"
+            className="text-sm font-medium transition-colors hover:text-primary"
+          >
+            Brushes
+          </Link>
+          <Link
+            href="/collections?category=Paper%20&%20Canvas"
+            className="text-sm font-medium transition-colors hover:text-primary"
+          >
+            Canvas
+          </Link>
+          <Link
+            href="/about"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname === '/about' ? 'text-primary' : 'text-foreground'
+            }`}
+          >
+            About
+          </Link>
+        </nav>
+
+        {/* Actions */}
+        <div className="flex items-center space-x-2">
+          <SearchDialog />
+
+          <Link href="/profile">
+            <Button variant="ghost" size="icon" className="relative">
+              <Heart className="h-5 w-5" />
+              {wishlistItems.length > 0 && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  {wishlistItems.length}
+                </Badge>
+              )}
+              <span className="sr-only">Wishlist</span>
+            </Button>
+          </Link>
+
+          <Link href="/cart">
+            <Button variant="ghost" size="icon" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  {cartItemCount}
+                </Badge>
+              )}
+              <span className="sr-only">Cart</span>
+            </Button>
+          </Link>
+
+          <Link href="/profile">
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+              <span className="sr-only">Profile</span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
 }

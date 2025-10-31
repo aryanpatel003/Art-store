@@ -10,7 +10,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Filter } from 'lucide-react';
-import type { Filters } from '@/app/collections/page';
+
+interface Filters {
+  categories: string[];
+  colors: string[];
+  priceRange: [number, number];
+}
 
 interface CollectionControlsProps {
   filters: Filters;
