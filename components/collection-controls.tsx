@@ -56,7 +56,7 @@ export function CollectionControls({ filters, setFilters, sortOption, setSortOpt
     setFilters({ categories: [], colors: [], priceRange: [0, Math.ceil(maxPrice / 10) * 10] });
   };
   
-  const formatPrice = (price: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(price);
+  const formatPrice = (price: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
 
   const hasActiveFilters = filters.categories.length > 0 || filters.colors.length > 0 || filters.priceRange[0] > 0 || filters.priceRange[1] < Math.ceil(maxPrice / 10) * 10;
 
